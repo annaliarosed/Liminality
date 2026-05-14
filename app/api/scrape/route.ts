@@ -6,6 +6,7 @@ import { isAllowedByRobots } from "@/app/lib/robots";
 import { isDeadlineExpired } from "@/app/lib/deadline";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 interface RawItem {
   title: string;
