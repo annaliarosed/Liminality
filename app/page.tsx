@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import JobsClient from "./components/JobsClient";
-import { isDeadlineExpired } from "./lib/deadline";
+import { isDeadlineExpired, isStartYearPassed } from "./lib/deadline";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,9 @@ async function getJobs() {
   }
 
   if (error) throw new Error(`Failed to fetch jobs: ${error.message}`);
-  return (data ?? []).filter((job) => !isDeadlineExpired(job.deadline));
+  return (data ?? []).filter(
+    (job) => !isDeadlineExpired(job.deadline) && !isStartYearPassed(job.start_date),
+  );
 }
 
 export default async function Home() {

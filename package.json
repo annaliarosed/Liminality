@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.104.1",
     "cheerio": "^1.2.0",
     "exa-js": "^2.12.1",
+    "fast-xml-parser": "^5.8.0",
     "groq-sdk": "^1.1.2",
     "next": "16.2.4",
     "pdf-parse": "^2.4.5",

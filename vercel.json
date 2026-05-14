@@ -9,10 +9,6 @@
       "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/scrape/sfaa",
-      "schedule": "10 8 * * *"
-    },
-    {
       "path": "/api/scrape/exa",
       "schedule": "20 8 * * *"
     }

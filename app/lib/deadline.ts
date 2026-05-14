@@ -75,6 +75,7 @@ function parseDeadline(deadline: string): Date | null {
 /**
  * Returns true only when a deadline string resolves to a past date.
  * Genuinely ambiguous strings ("Open until filled", "Rolling") return false — keep those jobs.
+ * start_date never influences this check — use isStartYearPassed for that separately.
  */
 export function isDeadlineExpired(
   deadline: string | null | undefined,
@@ -91,4 +92,27 @@ export function isDeadlineExpired(
     );
   }
   return expired;
+}
+
+/**
+ * Returns true if start_date contains a 4-digit year that has fully passed
+ * (i.e. year < current year). A position that started in a prior year is never
+ * still open. Returns false for current/future years and for unparseable values.
+ */
+export function isStartYearPassed(
+  startDate: string | null | undefined,
+  opts?: { log?: (msg: string) => void; url?: string },
+): boolean {
+  if (!startDate) return false;
+  const match = startDate.match(/\b(20\d{2})\b/);
+  if (!match) return false;
+  const year = parseInt(match[1]);
+  const passed = year < new Date().getFullYear();
+  if (passed && opts?.log) {
+    opts.log(
+      `[deadline] Start year passed — start_date "${startDate}" (year ${year})` +
+        (opts.url ? ` (${opts.url})` : ""),
+    );
+  }
+  return passed;
 }

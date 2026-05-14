@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { isDeadlineExpired } from "@/app/lib/deadline";
+import { isDeadlineExpired, isStartYearPassed } from "@/app/lib/deadline";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -13,13 +13,16 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("jobs")
-      .select("url, title, deadline")
-      .not("deadline", "is", null);
+      .select("url, title, deadline, start_date");
 
     if (error) throw new Error(`Fetch failed: ${error.message}`);
 
     const expiredUrls = (data ?? [])
-      .filter((job) => isDeadlineExpired(job.deadline, { log: console.log, url: job.url }))
+      .filter(
+        (job) =>
+          isDeadlineExpired(job.deadline, { log: console.log, url: job.url }) ||
+          isStartYearPassed(job.start_date, { log: console.log, url: job.url }),
+      )
       .map((job) => job.url);
 
     if (expiredUrls.length === 0) {

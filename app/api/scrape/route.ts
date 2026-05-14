@@ -1,5 +1,5 @@
 import Groq from "groq-sdk";
-import { SOURCES, scrapeSource, scrapeExa, saveJobs, NormalizedJob } from "@/app/lib/scrape-utils";
+import { SOURCES, scrapeSource, scrapeHNet, scrapeExa, saveJobs, NormalizedJob } from "@/app/lib/scrape-utils";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -14,7 +14,11 @@ export async function GET(request: Request) {
     const tasks =
       sourceFilter === "exa"
         ? [scrapeExa(groqClient)]
-        : [...SOURCES.map((source) => scrapeSource(source, groqClient)), scrapeExa(groqClient)];
+        : [
+            scrapeHNet(groqClient),
+            ...SOURCES.map((source) => scrapeSource(source, groqClient)),
+            scrapeExa(groqClient),
+          ];
 
     const results = await Promise.allSettled(tasks);
 
