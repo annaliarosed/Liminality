@@ -36,6 +36,7 @@ export interface Source {
   name: string;
   urls: string[];
   parse: (html: string) => RawItem[];
+  skipPageFetch?: boolean; // use feed description as-is, skip individual page fetches
 }
 
 // ── utilities ─────────────────────────────────────────────────────────────────
@@ -317,11 +318,13 @@ export const SOURCES: Source[] = [
   {
     id: "h-net",
     name: "H-Net",
+    // Drupal RSS feed — descriptions are included so no individual page fetches needed
     urls: [
-      "https://networks.h-net.org/jobs/browse?field_job_category_target_id=250142",
-      "https://networks.h-net.org/jobs/browse",
+      "https://networks.h-net.org/jobs/browse?field_job_category_target_id=250142&_format=rss",
+      "https://networks.h-net.org/jobs/browse?_format=rss",
     ],
-    parse: parseHNet,
+    parse: parseRSS,
+    skipPageFetch: true,
   },
   {
     id: "easa",
@@ -479,19 +482,22 @@ export async function scrapeSource(
     return [];
   }
 
-  const fetchedItems: RawItem[] = [];
-  for (let i = 0; i < rawItems.length; i++) {
-    if (i > 0) await sleep(1000);
-    const content = await fetchJobPage(rawItems[i].link);
-    if (content === null) {
-      console.log(
-        `[scrape] ${source.name}: skipping unavailable page: ${rawItems[i].link}`,
-      );
-      continue;
+  if (!source.skipPageFetch) {
+    // Fetch each job's full page, 1 s apart; drop pages that are gone/unavailable
+    const fetchedItems: RawItem[] = [];
+    for (let i = 0; i < rawItems.length; i++) {
+      if (i > 0) await sleep(1000);
+      const content = await fetchJobPage(rawItems[i].link);
+      if (content === null) {
+        console.log(
+          `[scrape] ${source.name}: skipping unavailable page: ${rawItems[i].link}`,
+        );
+        continue;
+      }
+      fetchedItems.push({ ...rawItems[i], description: content });
     }
-    fetchedItems.push({ ...rawItems[i], description: content });
+    rawItems = fetchedItems;
   }
-  rawItems = fetchedItems;
 
   const BATCH_SIZE = 5;
   const normalized: NormalizedJob[] = [];
