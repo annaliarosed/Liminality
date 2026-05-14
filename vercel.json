@@ -1,12 +1,20 @@
 {
   "crons": [
     {
-      "path": "/api/cleanup",
+      "path": "/api/scrape/cleanup",
       "schedule": "0 7 * * *"
     },
     {
-      "path": "/api/scrape",
+      "path": "/api/scrape/hnet",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/scrape/sfaa",
+      "schedule": "10 8 * * *"
+    },
+    {
+      "path": "/api/scrape/exa",
+      "schedule": "20 8 * * *"
     }
   ]
 }
